@@ -36,6 +36,10 @@ func (circuit *fibCircuit) Define(api frontend.API) error {
 func main() {
 	var circuit fibCircuit
 
+	firstSecret := *big.NewInt(0)
+	secondSecret := *big.NewInt(1)
+	result := "354224848179261915075"
+
 	// Compile the circuit into a set of constraints
 	ccs, err := frontend.Compile(ecc.BN254, r1cs.NewBuilder, &circuit)
 	if err != nil {
@@ -48,17 +52,16 @@ func main() {
 		log.Fatalf("Failed to setup the proving and verifying keys: %v", err)
 	}
 
-	resultBigInt, success := new(big.Int).SetString("354224848179261915075", 10)
+	resultBigInt, success := new(big.Int).SetString(result, 10)
 	if !success {
 		log.Fatalf("Failed to convert the string to big.Int")
 	}
+
 	assignment := fibCircuit{
-		A:      *big.NewInt(0),
-		B:      *big.NewInt(1),
+		A:      firstSecret,
+		B:      secondSecret,
 		Result: *resultBigInt,
 	}
-
-	
 
 	// Create a witness from the assignment
 	witness, err := frontend.NewWitness(&assignment, ecc.BN254)
