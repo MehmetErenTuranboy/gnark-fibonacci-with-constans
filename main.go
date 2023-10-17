@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"math/big"
+
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
@@ -22,7 +24,7 @@ func (circuit *fibCircuit) Define(api frontend.API) error {
 	a := circuit.A
 	b := circuit.B
 
-	for i := 2; i <= 20; i++ {
+	for i := 2; i <= 100; i++ {
 		next := api.Add(a, b)
 		a, b = b, next
 	}
@@ -46,8 +48,17 @@ func main() {
 		log.Fatalf("Failed to setup the proving and verifying keys: %v", err)
 	}
 
-	// Define the witness
-	assignment := fibCircuit{A: 0, B: 1, Result: 6765}
+	resultBigInt, success := new(big.Int).SetString("354224848179261915075", 10)
+	if !success {
+		log.Fatalf("Failed to convert the string to big.Int")
+	}
+	assignment := fibCircuit{
+		A:      *big.NewInt(0),
+		B:      *big.NewInt(1),
+		Result: *resultBigInt,
+	}
+
+	
 
 	// Create a witness from the assignment
 	witness, err := frontend.NewWitness(&assignment, ecc.BN254)
